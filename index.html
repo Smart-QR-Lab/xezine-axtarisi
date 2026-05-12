@@ -20,7 +20,9 @@
 </head>
 <body>
 
-    <audio id="victory-audio" src="ses.mp3" preload="auto"></audio>
+    <audio id="user-voice" src="WhatsApp Audio 2026-05-12 at 6.34.59 PM.aac" preload="auto"></audio>
+    
+    <audio id="epic-music" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-15.mp3" preload="auto"></audio>
 
     <div class="container" id="game-ui">
         <h1 style="letter-spacing: 3px;">SİSTEM ENERJİSİ: <span id="percent">0%</span></h1>
@@ -48,15 +50,18 @@
     <script>
         let power = 0;
         let interval;
-        const audio = document.getElementById('victory-audio');
+        const voice = document.getElementById('user-voice');
+        const music = document.getElementById('epic-music');
 
         function startLoading() {
-            // Səsə icazə vermək üçün (Mobil brauzerlər üçün lazımdır)
-            audio.play(); audio.pause();
+            // Səsləri brauzerdə "oyadırıq"
+            voice.play(); voice.pause();
+            music.play(); music.pause();
             
             interval = setInterval(() => {
                 if (power < 100) {
                     power += 1;
+                    document.getElementById('bar').width = power + "%"; // Vizual bar üçün
                     document.getElementById('bar').style.width = power + "%";
                     document.getElementById('percent').innerText = power + "%";
                 } else {
@@ -72,15 +77,21 @@
             document.getElementById('game-ui').style.display = 'none';
             document.getElementById('final-screen').style.display = 'flex';
             
-            // Səsini və epik musiqini başlat
-            audio.currentTime = 0;
-            audio.play();
+            // Epik musiqi alçaq səslə başlayır
+            music.volume = 0.4;
+            music.currentTime = 0;
+            music.play();
+
+            // Sənin səsin tam səslə başlayır
+            voice.volume = 1.0;
+            voice.currentTime = 0;
+            voice.play();
 
             // Konfeti yağışı
             var end = Date.now() + (5 * 1000);
             (function frame() {
-                confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 }, colors: ['#00ff00', '#ffd700'] });
-                confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 }, colors: ['#00ff00', '#ffd700'] });
+                confetti({ particleCount: 7, angle: 60, spread: 55, origin: { x: 0 }, colors: ['#00ff00', '#ffd700'] });
+                confetti({ particleCount: 7, angle: 120, spread: 55, origin: { x: 1 }, colors: ['#00ff00', '#ffd700'] });
                 if (Date.now() < end) { requestAnimationFrame(frame); }
             }());
         }
