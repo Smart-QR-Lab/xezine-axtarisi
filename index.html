@@ -3,92 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QR CREATOR - DIGITAL BRAIN AR</title>
+    <title>QR CREATOR - FINAL SHOW</title>
     <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
     <style>
-        body { background: #000; margin: 0; color: #0f0; font-family: 'Courier New', monospace; overflow: hidden; }
-        .header { position: absolute; top: 20px; width: 100%; text-align: center; z-index: 10; text-shadow: 0 0 10px #0f0; }
+        body { background: #000; color: #0f0; font-family: 'Courier New', monospace; margin: 0; text-align: center; overflow: hidden; }
+        .ui-container { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; }
         
-        /* 3D Modelin ölçüləri */
-        model-viewer {
-            width: 100%;
-            height: 85vh;
-            --poster-color: transparent;
+        /* Enerji Barı */
+        #bar-bg { width: 80%; height: 30px; border: 2px solid #0f0; margin: 20px; box-shadow: 0 0 15px #0f0; }
+        #bar-fill { width: 0%; height: 100%; background: #0f0; transition: 0.1s; }
+        
+        /* Düymə Animasiyası */
+        #main-btn { 
+            width: 100px; height: 100px; border-radius: 50%; border: none; 
+            background: #0f0; font-size: 40px; cursor: pointer;
+            box-shadow: 0 0 20px #0f0; outline: none; -webkit-tap-highlight-color: transparent;
         }
+        #main-btn:active { transform: scale(0.9); background: #008800; }
 
-        .controls {
-            position: absolute;
-            bottom: 30px;
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            z-index: 10;
-        }
-
-        #ar-button {
-            background: #0f0;
-            color: #000;
-            border: none;
-            padding: 15px 35px;
-            font-size: 18px;
-            font-weight: bold;
-            border-radius: 50px;
-            cursor: pointer;
-            box-shadow: 0 0 20px #0f0;
-            margin-bottom: 10px;
-        }
-
-        .footer-text { font-size: 14px; opacity: 0.8; }
+        /* Final Ekranı */
+        #final-ui { display: none; width: 100%; height: 100vh; position: absolute; top: 0; background: #000; flex-direction: column; align-items: center; justify-content: center; }
+        model-viewer { width: 100%; height: 70vh; }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <h1>🧠 RƏQƏMSAL ZƏKA PORTALI</h1>
-        <p>Sistem İdentifikasiyası: QR CREATOR</p>
+    <div class="ui-container" id="loading-screen">
+        <h1 id="status-text">Baza Yüklənir: 0%</h1>
+        <div id="bar-bg"><div id="bar-fill"></div></div>
+        <p>Sistemi aktivləşdirmək üçün düyməni BASILI SAXLA</p>
+        <button id="main-btn" onmousedown="startLoading()" onmouseup="stopLoading()" ontouchstart="startLoading()" ontouchend="stopLoading()">🔋</button>
     </div>
 
-    <model-viewer 
-        id="brain-model"
-        src="https://modelviewer.dev/shared-assets/models/Astronaut.glb" 
-        ios-src=""
-        ar 
-        ar-modes="webxr scene-viewer quick-look" 
-        camera-controls 
-        auto-rotate 
-        rotation-speed="200%"
-        shadow-intensity="2"
-        exposure="1"
-        environment-image="neutral">
-        
-        <div class="controls">
-            <button id="ar-button">🚀 MODELİ MASADA CANLANDIR</button>
-            <p class="footer-text">Vüqar müəllim, gələcəyə xoş gəldiniz!</p>
-        </div>
-    </model-viewer>
+    <div id="final-ui">
+        <h1 style="color:gold;">MİSSİYA TAMAMLANDI! 🚀</h1>
+        <model-viewer id="brain" 
+            src="https://modelviewer.dev/shared-assets/models/Astronaut.glb" 
+            auto-rotate camera-controls ar shadow-intensity="1">
+        </model-viewer>
+        <p>Vüqar müəllim, gələcəyə xoş gəldiniz!</p>
+    </div>
 
-    <audio id="victory-voice" src="WhatsApp Audio 2026-05-12 at 6.34.59 PM.aac" preload="auto"></audio>
+    <audio id="v-audio" src="WhatsApp Audio 2026-05-12 at 6.34.59 PM.aac"></audio>
+    <audio id="epic-bg" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-15.mp3" loop></audio>
 
     <script>
-        const modelViewer = document.querySelector('#brain-model');
-        const voice = document.getElementById('victory-voice');
+        let progress = 0;
+        let timer;
+        const barFill = document.getElementById('bar-fill');
+        const statusText = document.getElementById('status-text');
+        const voice = document.getElementById('v-audio');
+        const music = document.getElementById('epic-bg');
 
-        // Model AR-da (masada) yerləşdiriləndə səsin çıxsın
-        modelViewer.addEventListener('ar-status', (event) => {
-            if(event.detail.status === 'object-placed') {
-                voice.currentTime = 0;
-                voice.play();
-            }
-        });
+        function startLoading() {
+            // Brauzer səsləri bloklamasın deyə burada "oyadırıq"
+            voice.play(); voice.pause(); music.play(); music.pause();
+            
+            timer = setInterval(() => {
+                if (progress < 100) {
+                    progress++;
+                    barFill.style.width = progress + "%";
+                    statusText.innerText = "Baza Yüklənir: " + progress + "%";
+                } else {
+                    clearInterval(timer);
+                    finish();
+                }
+            }, 40); // 40ms * 100 = 4 saniyə basılı saxlamalıdır
+        }
 
-        // Ekrana toxunanda səsin dərhal başlaması üçün (ehtiyat variant)
-        document.body.addEventListener('click', () => {
-            if (voice.paused) {
-                voice.play();
-                voice.pause(); 
-            }
-        }, {once: true});
+        function stopLoading() {
+            clearInterval(timer);
+        }
+
+        function finish() {
+            document.getElementById('loading-screen').style.display = 'none';
+            document.getElementById('final-ui').style.display = 'flex';
+            
+            // Epik final səsləri
+            music.volume = 0.3; music.play();
+            voice.play();
+
+            // Konfeti yağışı
+            confetti({ particleCount: 200, spread: 80, origin: { y: 0.6 } });
+        }
     </script>
 </body>
 </html>
